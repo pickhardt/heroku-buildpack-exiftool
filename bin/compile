@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # bin/compile BUILD_DIR CACHE_DIR ENV_DIR
 
-set -e # fail fast
-
 arrow() {
   sed -u 's/^/-----> /'
 }
@@ -10,17 +8,30 @@ indent() {
   sed -u 's/^/       /'
 }
 
-    BUILD_DIR=$1
-    CACHE_DIR=$2
+## Fail immediately on non-zero exit code.
+set -e
+## Fail immediately on non-zero exit code within a pipeline.
+set -o pipefail
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
 BUILDPACK_DIR=`cd $(dirname $0)/..; pwd`
 
-TARBALL_URL="https://exiftool-buildpack.s3.us-west-1.amazonaws.com/Image-ExifTool-12.62.tar.gz"
- RENAME_DIR="$(echo "$TARBALL_URL" | perl -ne '/.+\/(.+)\.tar\.gz/ && print $1')"
- VERSION_NO="$(echo "$RENAME_DIR"  | perl -ne '/ExifTool-(.+)$/i   && print $1')"
+if [ -f $ENV_DIR/EXIFTOOL_URL_CUSTOM ]; then
+  TARBALL_URL=$( cat $ENV_DIR/EXIFTOOL_URL_CUSTOM )
+  echo "Start downloading Exiftool from $TARBALL_URL" | indent
+else
+  echo "Custom Exiftool URL is not set, start downloading from default location" | indent
+  TARBALL_URL="https://www.mirrorservice.org/sites/distfiles.macports.org/perl5/Image-ExifTool-11.35.tar.gz"
+fi
+
+RENAME_DIR="$(echo "$TARBALL_URL" | perl -ne '/.+\/(.+)\.tar\.gz/ && print $1')"
+VERSION_NO="$(echo "$RENAME_DIR"  | perl -ne '/ExifTool-(.+)$/i   && print $1')"
 
 PROFILE_PATH="$BUILD_DIR/.profile.d"
- TARGET_PATH="$BUILD_DIR/vendor"
- VENDOR_PATH="/app/vendor"
+TARGET_PATH="$BUILD_DIR/vendor"
+VENDOR_PATH="/app/vendor"
 
 echo "Installing exiftool $VERSION_NO" | arrow
 mkdir -p "$TARGET_PATH"
@@ -31,18 +42,13 @@ echo "Fetching   $TARBALL_URL" | indent
 curl --fail --retry 3 --retry-delay 1 --connect-timeout 3 "$TARBALL_URL" -s -o - | tar xzf -
 
 # configure path
-echo "Configuring exiftool profile path" | indent
 mkdir -p    "$PROFILE_PATH"
 cat <<EOF > "$PROFILE_PATH/exiftool.sh"
-export PATH="$VENDOR_PATH/exiftool/bin:\$PATH"
+export PATH="$VENDOR_PATH/exiftool:\$PATH"
 EOF
 
 # show installed version
-echo "Renaming $RENAME_DIR to exiftool" | indent
 mv "$RENAME_DIR" exiftool
-
-mkdir ./exiftool/bin
-cp ./exiftool/exiftool ./exiftool/bin/exiftool
-
-echo "Installed: exiftool"
+cd             ./exiftool
+echo "Installed: "`ls exif*` | indent
 echo
