@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+
+set -e # fail fast
+
+arrow() {
+  sed -u 's/^/-----> /'
+}
+indent() {
+  sed -u 's/^/       /'
+}
+
+    BUILD_DIR=$1
+    CACHE_DIR=$2
+BUILDPACK_DIR=`cd $(dirname $0)/..; pwd`
+
+TARBALL_URL="https://exiftool.org/Image-ExifTool-12.62.tar.gz"
+ RENAME_DIR="$(echo "$TARBALL_URL" | perl -ne '/.+\/(.+)\.tar\.gz/ && print $1')"
+ VERSION_NO="$(echo "$RENAME_DIR"  | perl -ne '/ExifTool-(.+)$/i   && print $1')"
+
+PROFILE_PATH="$BUILD_DIR/.profile.d"
+ TARGET_PATH="$BUILD_DIR/vendor"
+ VENDOR_PATH="/app/vendor"
+
+echo "Installing exiftool $VERSION_NO" | arrow
+mkdir -p "$TARGET_PATH"
+cd       "$TARGET_PATH"
+
+# download and unpack
+echo "Fetching   $TARBALL_URL" | indent
+curl --fail --retry 3 --retry-delay 1 --connect-timeout 3 "$TARBALL_URL" -s -o - | tar xzf -
+
+# configure path
+mkdir -p    "$PROFILE_PATH"
+cat <<EOF > "$PROFILE_PATH/exiftool.sh"
+export PATH="$VENDOR_PATH/exiftool/bin:\$PATH"
+EOF
+
+# show installed version
+mv "$RENAME_DIR" exiftool
+cd             ./exiftool/bin
+echo "Installed: "`ls exif*` | indent
+echo
