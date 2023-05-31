@@ -39,16 +39,10 @@ EOF
 
 # show installed version
 echo "Renaming $RENAME_DIR to exiftool" | indent
-ls -l
 mv "$RENAME_DIR" exiftool
 
-echo "************* ls -l ./ ****************"
-ls -l ./
-echo "************* ls -l ./exiftool ****************"
-ls -l ./exiftool
-echo "************* ls -l ./exiftool/bin ****************"
-ls -l ./exiftool/bin
-echo "Going to ./exiftool/bin" | indent
-cd ./exiftool/bin
-echo "Installed: "`ls exif*` | indent
+mkdir ./exiftool/bin
+cp ./exiftool/exiftool ./exiftool/bin/exiftool
+
+echo "Installed: exiftool"
 echo
