@@ -31,13 +31,18 @@ echo "Fetching   $TARBALL_URL" | indent
 curl --fail --retry 3 --retry-delay 1 --connect-timeout 3 "$TARBALL_URL" -s -o - | tar xzf -
 
 # configure path
+echo "Configuring exiftool profile path" | indent
 mkdir -p    "$PROFILE_PATH"
 cat <<EOF > "$PROFILE_PATH/exiftool.sh"
 export PATH="$VENDOR_PATH/exiftool/bin:\$PATH"
 EOF
 
 # show installed version
+echo "Renaming $RENAME_DIR to exiftool" | indent
 mv "$RENAME_DIR" exiftool
+
+ls -l ./exiftool/bin
+echo "Going to ./exiftool/bin" | indent
 cd ./exiftool/bin
 echo "Installed: "`ls exif*` | indent
 echo
