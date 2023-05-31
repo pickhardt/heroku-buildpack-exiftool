@@ -14,7 +14,7 @@ indent() {
     CACHE_DIR=$2
 BUILDPACK_DIR=`cd $(dirname $0)/..; pwd`
 
-TARBALL_URL="https://exiftool-buildpack.s3.us-west-1.amazonaws.com/exiftool-12.62.tar.gz"
+TARBALL_URL="https://exiftool-buildpack.s3.us-west-1.amazonaws.com/Image-ExifTool-12.62.tar.gz"
  RENAME_DIR="$(echo "$TARBALL_URL" | perl -ne '/.+\/(.+)\.tar\.gz/ && print $1')"
  VERSION_NO="$(echo "$RENAME_DIR"  | perl -ne '/ExifTool-(.+)$/i   && print $1')"
 
@@ -39,8 +39,14 @@ EOF
 
 # show installed version
 echo "Renaming $RENAME_DIR to exiftool" | indent
+ls -l
 mv "$RENAME_DIR" exiftool
 
+echo "************* ls -l ./ ****************"
+ls -l ./
+echo "************* ls -l ./exiftool ****************"
+ls -l ./exiftool
+echo "************* ls -l ./exiftool/bin ****************"
 ls -l ./exiftool/bin
 echo "Going to ./exiftool/bin" | indent
 cd ./exiftool/bin
