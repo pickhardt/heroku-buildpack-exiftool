@@ -23,7 +23,7 @@ if [ -f $ENV_DIR/EXIFTOOL_URL_CUSTOM ]; then
   echo "Start downloading Exiftool from $TARBALL_URL" | indent
 else
   echo "Custom Exiftool URL is not set, start downloading from default location" | indent
-  TARBALL_URL="https://www.mirrorservice.org/sites/distfiles.macports.org/perl5/Image-ExifTool-11.35.tar.gz"
+  TARBALL_URL="https://exiftool-buildpack.s3.us-west-1.amazonaws.com/Image-ExifTool-12.62.tar.gz"
 fi
 
 RENAME_DIR="$(echo "$TARBALL_URL" | perl -ne '/.+\/(.+)\.tar\.gz/ && print $1')"
